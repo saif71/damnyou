@@ -6,10 +6,12 @@ It previews only regeneratable project artifacts, lets you opt in or out of ever
 
 ```sh
 npm i @saif71/damnyou
+```
 
-damnyou npm
-damnyou next
-damnyou npm next --rebuild
+or
+
+```sh
+bun add @saif71/damnyou
 ```
 
 ## Usage
