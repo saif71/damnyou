@@ -1,5 +1,5 @@
 {
-  "name": "damnyou",
+  "name": "@saif71/damnyou",
   "version": "0.1.0",
   "description": "Safely remove regeneratable JavaScript project artifacts, then reinstall or rebuild.",
   "author": "saif71 (https://github.com/saif71)",

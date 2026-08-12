@@ -1,6 +1,6 @@
 # damnyou
 
-`damnyou` is the calm, safe version of deleting `node_modules` while you are mad at your tooling.
+`damnyou` safely previews, deletes, and optionally regenerates known JavaScript project artifacts from the current folder.
 
 It previews only regeneratable project artifacts, lets you opt in or out of every task, asks for a final confirmation, then removes the selected paths and can reinstall dependencies.
 
@@ -12,9 +12,37 @@ damnyou next
 damnyou npm next --rebuild
 ```
 
+`fuck` is an official alias for `damnyou`, so every example below also works with `fuck`.
+
+## Usage
+
+Run the command from the folder that contains the project's `package.json`.
+
+| Command | What it does |
+| --- | --- |
+| `damnyou` | Detects applicable safe cleanup tasks and lets you choose what to run. Prompts for a package manager when lockfiles conflict. |
+| `damnyou npm` | Removes local `node_modules`, then runs a lockfile-aware npm install. Replace `npm` with `pnpm`, `yarn`, or `bun` for that manager. |
+| `damnyou next` | Cleans artifacts owned by Next.js. Replace `next` with any supported framework or tool. `nextjs` is also accepted. |
+| `damnyou npm next` | Combines dependency repair with one or more framework/tool cleanup targets. |
+| `damnyou next --rebuild` | Cleans the selected targets, then runs the selected manager's `run build` script. |
+| `damnyou --include generated-client` | Adds an exact project-relative file or directory to the cleanup plan. Repeat `--include` for more paths. |
+| `damnyou astro --exclude dist` | Excludes an exact detected path. Repeat `--exclude` for more paths. |
+| `damnyou --manager pnpm` | Selects a manager explicitly, useful when several lockfiles exist or when using `--rebuild`. |
+| `damnyou --dry-run` | Shows the cleanup plan and commands without changing files. |
+| `damnyou npm --yes` | Accepts the default selections and confirmation; required for non-interactive cleanup. |
+| `damnyou --json` | Emits a structured plan/result to stdout; combine with `--yes` to execute. |
+| `damnyou --help` | Shows the built-in command reference. |
+| `damnyou --version` | Prints the installed version. |
+
 ## Platform support
 
 `damnyou` runs on macOS and Linux. Windows is not supported yet: package managers are installed there as `.cmd` shims, which the current command lookup and process spawning do not handle. It is tracked for a future release.
+
+## Supported frameworks and tools
+
+- Frameworks: Next.js (`next` or `nextjs`), Astro, Vite, Nuxt, Remix, SvelteKit, and Storybook.
+- Tooling: Vitest, Jest, ESLint, and TypeScript.
+- Package managers: npm, pnpm, Yarn, and Bun.
 
 ## What it cleans
 
