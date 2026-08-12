@@ -5,7 +5,7 @@
 It previews only regeneratable project artifacts, lets you opt in or out of every task, asks for a final confirmation, then removes the selected paths and can reinstall dependencies.
 
 ```sh
-npm install --global damnyou
+npm i @saif71/damnyou
 
 damnyou npm
 damnyou next
