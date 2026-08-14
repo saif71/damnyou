@@ -3,7 +3,7 @@
 ## Safely rebuild your project dependencies with one command when you are angry.
 
 <figure>
-  <img src="image.png">
+  <img src="https://raw.githubusercontent.com/saif71/damnyou/main/image.png">
   <figcaption>Season 2, Episode 7 ("The Hack") | Netflix comedy series "Space Force"</figcaption>
 </figure>
 
