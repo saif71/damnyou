@@ -1,6 +1,13 @@
 # damnyou
 
-`damnyou` safely previews, deletes, and optionally regenerates known JavaScript project artifacts from the current folder.
+## Safely rebuild your project dependencies with one command when you are angry.
+
+<figure>
+  <img src="image.png">
+  <figcaption>Season 2, Episode 7 ("The Hack") | Netflix comedy series "Space Force"</figcaption>
+</figure>
+
+It safely previews, deletes, and optionally regenerates known JavaScript project artifacts from the current folder.
 
 It previews only regeneratable project artifacts, lets you opt in or out of every task, asks for a final confirmation, then removes the selected paths and can reinstall dependencies.
 
@@ -36,15 +43,15 @@ Run the command from the folder that contains the project's `package.json`.
 
 ## Platform support
 
-`damnyou` runs on macOS and Linux. Windows is not supported yet: package managers are installed there as `.cmd` shims, which the current command lookup and process spawning do not handle. It is tracked for a future release.
+`damnyou` runs on macOS and Linux. Windows is not supported yet.
 
 ## Supported frameworks and tools
 
-- Frameworks: Next.js (`next` or `nextjs`), Astro, Vite, Nuxt, Remix, SvelteKit, and Storybook.
+- Frameworks: Next.js, Astro, Vite, Nuxt, Remix, SvelteKit, and Storybook.
 - Tooling: Vitest, Jest, ESLint, and TypeScript.
 - Package managers: npm, pnpm, Yarn, and Bun.
 
-## What it cleans
+## What it cleans & rebuild
 
 Run it only from the project folder—the folder containing `package.json`.
 
@@ -105,7 +112,7 @@ In a non-interactive terminal, `damnyou` previews and exits unless `--yes` is su
 
 ## Development
 
-Requires Node.js 20 or newer.
+Requires Node.js 22 or newer.
 
 ```sh
 npm install
