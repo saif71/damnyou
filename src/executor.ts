@@ -1,16 +1,16 @@
-import { access, rm } from "node:fs/promises";
-import { constants } from "node:fs";
+import { rm, stat } from "node:fs/promises";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { assertNoSymlinkInPath } from "./safety.js";
-import type { CleanupTask, CommandSpec } from "./types.js";
+import type { CleanupPath, CleanupTask, CommandSpec } from "./types.js";
 
 export async function commandExists(command: string): Promise<boolean> {
   const paths = process.env.PATH?.split(path.delimiter) ?? [];
   for (const directory of paths) {
+    if (!directory) continue;
     try {
-      await access(path.join(directory, command), constants.X_OK);
-      return true;
+      const info = await stat(path.join(directory, command));
+      if (info.isFile()) return true;
     } catch {
       // Keep looking.
     }
@@ -18,24 +18,49 @@ export async function commandExists(command: string): Promise<boolean> {
   return false;
 }
 
-export async function deleteTasks(root: string, tasks: CleanupTask[]): Promise<string[]> {
+export async function deleteTasks(
+  root: string,
+  tasks: CleanupTask[],
+  onStart?: (item: CleanupPath) => void,
+): Promise<string[]> {
   const deleted: string[] = [];
   const seen = new Set<string>();
   for (const task of tasks) {
     for (const item of task.paths) {
       if (seen.has(item.absolutePath)) continue;
       seen.add(item.absolutePath);
-      await assertNoSymlinkInPath(root, item.absolutePath);
-      await rm(item.absolutePath, { recursive: true, force: false, maxRetries: 3, retryDelay: 150 });
+      onStart?.(item);
+      try {
+        await assertNoSymlinkInPath(root, item.absolutePath);
+      } catch (error) {
+        // A path that vanished after planning is already gone; skip it
+        // instead of aborting the remaining deletions.
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") continue;
+        throw error;
+      }
+      // force ignores ENOENT so a path removed concurrently is not an error.
+      await rm(item.absolutePath, {
+        recursive: true,
+        force: true,
+        maxRetries: 3,
+        retryDelay: 150,
+      });
       deleted.push(item.relativePath);
     }
   }
   return deleted;
 }
 
-export async function runCommand(spec: CommandSpec, cwd: string, json = false): Promise<void> {
+export async function runCommand(
+  spec: CommandSpec,
+  cwd: string,
+  json = false,
+): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(spec.command, spec.args, { cwd, stdio: json ? ["ignore", "pipe", "pipe"] : "inherit" });
+    const child = spawn(spec.command, spec.args, {
+      cwd,
+      stdio: json ? ["ignore", "pipe", "pipe"] : "inherit",
+    });
     if (json) {
       child.stdout?.pipe(process.stderr);
       child.stderr?.pipe(process.stderr);
@@ -43,7 +68,12 @@ export async function runCommand(spec: CommandSpec, cwd: string, json = false): 
     child.once("error", (error) => reject(error));
     child.once("exit", (code, signal) => {
       if (code === 0) resolve();
-      else reject(new Error(`${spec.label} failed${signal ? ` (${signal})` : ` with exit code ${code ?? "unknown"}`}.`));
+      else
+        reject(
+          new Error(
+            `${spec.label} failed${signal ? ` (${signal})` : ` with exit code ${code ?? "unknown"}`}.`,
+          ),
+        );
     });
   });
 }

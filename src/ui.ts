@@ -37,12 +37,12 @@ export async function chooseManager(choices: PackageManager[]): Promise<PackageM
   }
 }
 
-export async function chooseTasks(plan: CleanupPlan): Promise<Set<string> | undefined> {
+export async function chooseTasks(plan: CleanupPlan, render: () => string): Promise<Set<string> | undefined> {
   const selected = new Set(plan.tasks.map((task) => task.id));
   const rl = createInterface({ input, output });
   try {
     while (true) {
-      output.write(`${renderPlan(plan, selected)}\n`);
+      output.write(`${render()}\n`);
       const answer = (await rl.question("Toggle item numbers (e.g. 1,3), [a]ll, [n]one, Enter to continue, [q]uit: ")).trim().toLowerCase();
       if (!answer) return selected;
       if (answer === "q") return undefined;

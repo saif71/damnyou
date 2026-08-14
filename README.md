@@ -9,37 +9,50 @@
 
 It safely previews, deletes, and optionally regenerates known JavaScript project artifacts from the current folder.
 
-It previews only regeneratable project artifacts, lets you opt in or out of every task, asks for a final confirmation, then removes the selected paths and can reinstall dependencies.
+It previews only regeneratable project artifacts, lets you opt in or out of every task, asks for a final confirmation, then removes the selected paths, reinstalls dependencies, and runs the build script when one is defined.
+
+<br />
+
+## Running with `npm` or `bun`
 
 ```sh
-npm i @saif71/damnyou
+npx damnyou
 ```
 
 or
 
 ```sh
-bun add @saif71/damnyou
+bunx @saif71/damnyou
 ```
 
 ## Usage
 
 Run the command from the folder that contains the project's `package.json`.
 
-| Command                              | What it does                                                                                                                        |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `damnyou`                            | Detects applicable safe cleanup tasks and lets you choose what to run. Prompts for a package manager when lockfiles conflict.       |
-| `damnyou npm`                        | Removes local `node_modules`, then runs a lockfile-aware npm install. Replace `npm` with `pnpm`, `yarn`, or `bun` for that manager. |
-| `damnyou next`                       | Cleans artifacts owned by Next.js. Replace `next` with any supported framework or tool. `nextjs` is also accepted.                  |
-| `damnyou npm next`                   | Combines dependency repair with one or more framework/tool cleanup targets.                                                         |
-| `damnyou next --rebuild`             | Cleans the selected targets, then runs the selected manager's `run build` script.                                                   |
-| `damnyou --include generated-client` | Adds an exact project-relative file or directory to the cleanup plan. Repeat `--include` for more paths.                            |
-| `damnyou astro --exclude dist`       | Excludes an exact detected path. Repeat `--exclude` for more paths.                                                                 |
-| `damnyou --manager pnpm`             | Selects a manager explicitly, useful when several lockfiles exist or when using `--rebuild`.                                        |
-| `damnyou --dry-run`                  | Shows the cleanup plan and commands without changing files.                                                                         |
-| `damnyou npm --yes`                  | Accepts the default selections and confirmation; required for non-interactive cleanup.                                              |
-| `damnyou --json`                     | Emits a structured plan/result to stdout; combine with `--yes` to execute.                                                          |
-| `damnyou --help`                     | Shows the built-in command reference.                                                                                               |
-| `damnyou --version`                  | Prints the installed version.                                                                                                       |
+```sh
+damnyou <framework> --<option>
+```
+
+---
+
+> Prefix `npx` or `bunx` to run the command when it is not globally installed. Example: `npx damnyou npm next`
+
+| Command                              | What it does                                                                                                                       |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `damnyou`                            | Detects applicable safe cleanup tasks and lets you choose what to run. Prompts for a package manager when lockfiles conflict.      |
+| `damnyou npm`                        | Repairs dependencies with npm specifically. Replace `npm` with `pnpm`, `yarn`, or `bun` to force that manager.                     |
+| `damnyou next`                       | Cleans Next.js artifacts and repairs dependencies. Replace `next` with any supported framework or tool; `nextjs` is also accepted. |
+| `damnyou npm next`                   | Same as `damnyou next`, naming the manager explicitly (optional).                                                                  |
+| `damnyou next --rebuild`             | Runs the build script even when no reinstall happens.                                                                              |
+| `damnyou npm --no-build`             | Reinstalls dependencies but skips the automatic build.                                                                             |
+| `damnyou --include generated-client` | Adds an exact project-relative file or directory to the cleanup plan. Repeat `--include` for more paths.                           |
+| `damnyou astro --exclude dist`       | Excludes an exact detected path. Repeat `--exclude` for more paths.                                                                |
+| `damnyou --manager pnpm`             | Selects a manager explicitly, useful when several lockfiles exist or when using `--rebuild`.                                       |
+| `damnyou --dry-run`                  | Shows the cleanup plan and commands without changing files.                                                                        |
+| `damnyou npm --yes`                  | Accepts the default selections and confirmation; required for non-interactive cleanup.                                             |
+| `damnyou --json`                     | Emits a structured plan/result to stdout; combine with `--yes` to execute.                                                         |
+| `damnyou --help`                     | Shows the built-in command reference.                                                                                              |
+| `damnyou --version`                  | Prints the installed version.                                                                                                      |
 
 ## Platform support
 
@@ -61,7 +74,7 @@ Run it only from the project folder—the folder containing `package.json`.
 - `vite`: `node_modules/.vite`, default `dist`
 - `nuxt`, `remix`, `sveltekit`, `storybook`, `vitest`, `jest`, `eslint`, and `typescript`: their known local generated outputs when present.
 
-Bare `damnyou` automatically proposes every detected safe task. If it sees multiple package-manager lockfiles, it asks you which manager to use rather than guessing.
+Every invocation repairs dependencies: `node_modules` is deleted and reinstalled, and the build script runs afterward when one is defined (`--no-build` skips it). Targets only scope which extra framework artifacts are cleaned; bare `damnyou` proposes every detected safe task. The package manager is detected in this order: an explicit `--manager` flag, a manager target such as `damnyou bun`, the `packageManager` field in `package.json`, a single detected lockfile, and finally npm when no lockfile exists. If several lockfiles are found and none of the above resolves the choice, it asks you which manager to use rather than guessing.
 
 ## Safety model
 
@@ -84,7 +97,7 @@ damnyou astro --exclude dist
 
 ## Reinstall and rebuild behavior
 
-When its compatible lockfile exists, a dependency repair uses a reproducible install:
+When its compatible lockfile exists, a dependency repair first tries a reproducible install:
 
 | Target | With lockfile                    | Without lockfile |
 | ------ | -------------------------------- | ---------------- |
@@ -93,7 +106,9 @@ When its compatible lockfile exists, a dependency repair uses a reproducible ins
 | `yarn` | `yarn install --frozen-lockfile` | `yarn install`   |
 | `bun`  | `bun install --frozen-lockfile`  | `bun install`    |
 
-Cleaning does not build by default. Add `--rebuild` to run the selected package manager’s `run build` after cleanup; this requires a `build` script in `package.json`.
+Reproducible installs fail when `package.json` and the lockfile have drifted apart — one of the most common ways dependencies break. When that happens, damnyou automatically retries with a plain `install`, so you are never left with a deleted `node_modules` and nothing installed.
+
+If `package.json` defines a `build` script, it runs automatically after a reinstall. Use `--no-build` to skip it, or `--rebuild` to force a build even when no reinstall happens. `--rebuild` requires a `build` script.
 
 ## Automation
 

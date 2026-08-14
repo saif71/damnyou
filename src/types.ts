@@ -12,7 +12,7 @@ export const frameworkTargets = [
   "vitest",
   "jest",
   "eslint",
-  "typescript"
+  "typescript",
 ] as const;
 export type FrameworkTarget = (typeof frameworkTargets)[number];
 export type Target = PackageManager | FrameworkTarget;
@@ -39,6 +39,7 @@ export interface CleanupTask {
   paths: CleanupPath[];
   description: string;
   install?: CommandSpec;
+  installFallback?: CommandSpec;
 }
 
 export interface CleanupPlan {
@@ -68,5 +69,6 @@ export interface CliOptions {
   yes: boolean;
   json: boolean;
   rebuild: boolean;
+  noBuild: boolean;
   manager?: PackageManager;
 }
