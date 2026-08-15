@@ -4,12 +4,16 @@
 
 <figure>
   <img src="https://raw.githubusercontent.com/saif71/damnyou/main/image.png">
-  <figcaption>Season 2, Episode 7 ("The Hack") | Netflix comedy series "Space Force"</figcaption>
+  <figcaption>Image: Season 2, Episode 7 ("The Hack") | Netflix comedy series "Space Force"</figcaption>
 </figure>
 
-It safely previews, deletes, and optionally regenerates known JavaScript project artifacts from the current folder.
+<br />
 
-It previews only regeneratable project artifacts, lets you opt in or out of every task, asks for a final confirmation, then removes the selected paths, reinstalls dependencies, and runs the build script when one is defined.
+## Why
+
+When you are working with a JavaScript project (i.e. next.js, react, vue, astro, etc.), Sometimes you suddenly realize something is broken. And you spend hours debugging only to find out that simply deleteing node_modules, re running `npm install` and rebuilding the project fixed the issues magically. By that time you are already angry and want to say `damnyou npm --yes` (or next, or astro or whatever).
+
+`damnyou` does exactly that. With one command it deletes the node_modules folder, reinstalls dependencies, and runs the build script.
 
 <br />
 
@@ -22,8 +26,22 @@ npx damnyou
 or
 
 ```sh
-bunx @saif71/damnyou
+bunx damnyou
 ```
+
+## Install globally
+
+```sh
+npm install -g damnyou
+```
+
+or
+
+```sh
+bun add damnyou -g
+```
+
+<br />
 
 ## Usage
 
